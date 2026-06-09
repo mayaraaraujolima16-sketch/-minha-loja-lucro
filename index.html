@@ -1,0 +1,703 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Minha Loja — Separador de Lucro</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --verde: #1a9e75;
+      --verde-light: #e1f5ee;
+      --verde-dark: #0f6e56;
+      --vermelho: #e24b4a;
+      --vermelho-light: #fcebeb;
+      --vermelho-dark: #a32d2d;
+      --amarelo: #f5a623;
+      --bg: #f7f6f3;
+      --surface: #ffffff;
+      --border: #e8e6e1;
+      --text: #1a1a18;
+      --muted: #6b6b67;
+      --faint: #b0afa9;
+      --radius: 12px;
+      --radius-sm: 8px;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 0 0 80px;
+    }
+
+    header {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 18px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    .logo {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--text);
+      letter-spacing: -0.02em;
+    }
+
+    .logo span {
+      color: var(--verde);
+    }
+
+    .margem-badge {
+      font-family: 'DM Mono', monospace;
+      font-size: 13px;
+      background: var(--verde-light);
+      color: var(--verde-dark);
+      padding: 4px 10px;
+      border-radius: 20px;
+      cursor: pointer;
+      border: none;
+      font-weight: 500;
+    }
+
+    .container {
+      max-width: 480px;
+      margin: 0 auto;
+      padding: 24px 16px 0;
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+      margin-bottom: 16px;
+    }
+
+    .card-label {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--faint);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 16px;
+    }
+
+    /* Input de valor */
+    .valor-wrap {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 12px 16px;
+      transition: border-color 0.15s;
+    }
+
+    .valor-wrap:focus-within {
+      border-color: var(--verde);
+    }
+
+    .valor-prefix {
+      font-family: 'DM Mono', monospace;
+      font-size: 20px;
+      font-weight: 500;
+      color: var(--muted);
+    }
+
+    #valorInput {
+      border: none;
+      outline: none;
+      font-family: 'DM Mono', monospace;
+      font-size: 28px;
+      font-weight: 500;
+      color: var(--text);
+      width: 100%;
+      background: transparent;
+    }
+
+    #valorInput::placeholder { color: var(--faint); }
+
+    .btn-salvar {
+      width: 100%;
+      margin-top: 14px;
+      padding: 14px;
+      background: var(--verde);
+      color: white;
+      border: none;
+      border-radius: var(--radius-sm);
+      font-family: 'Inter', sans-serif;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s, transform 0.1s;
+    }
+
+    .btn-salvar:hover { background: var(--verde-dark); }
+    .btn-salvar:active { transform: scale(0.98); }
+    .btn-salvar:disabled { background: var(--faint); cursor: not-allowed; }
+
+    /* Resultado */
+    .result-split {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 16px;
+    }
+
+    .split-box {
+      border-radius: var(--radius-sm);
+      padding: 16px 14px;
+      text-align: center;
+    }
+
+    .split-box.rep { background: var(--vermelho-light); }
+    .split-box.luc { background: var(--verde-light); }
+
+    .split-label {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-bottom: 6px;
+    }
+
+    .split-box.rep .split-label { color: var(--vermelho-dark); }
+    .split-box.luc .split-label { color: var(--verde-dark); }
+
+    .split-value {
+      font-family: 'DM Mono', monospace;
+      font-size: 22px;
+      font-weight: 500;
+    }
+
+    .split-box.rep .split-value { color: var(--vermelho-dark); }
+    .split-box.luc .split-value { color: var(--verde-dark); }
+
+    .split-pct {
+      font-size: 12px;
+      margin-top: 3px;
+      opacity: 0.7;
+    }
+
+    .split-box.rep .split-pct { color: var(--vermelho-dark); }
+    .split-box.luc .split-pct { color: var(--verde-dark); }
+
+    /* Barra */
+    .bar-track {
+      height: 8px;
+      background: var(--bg);
+      border-radius: 4px;
+      overflow: hidden;
+      margin: 14px 0 6px;
+      display: flex;
+    }
+
+    .bar-r { background: var(--vermelho); transition: width 0.4s; border-radius: 4px 0 0 4px; }
+    .bar-l { background: var(--verde); transition: width 0.4s; border-radius: 0 4px 4px 0; }
+
+    .bar-legend {
+      display: flex;
+      justify-content: space-between;
+      font-size: 11px;
+      color: var(--muted);
+    }
+
+    /* Histórico */
+    .hist-empty {
+      text-align: center;
+      color: var(--faint);
+      font-size: 14px;
+      padding: 20px 0;
+    }
+
+    .hist-row {
+      display: grid;
+      grid-template-columns: 60px 1fr auto auto;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 0;
+      border-bottom: 1px solid var(--border);
+      font-size: 14px;
+    }
+
+    .hist-row:last-child { border-bottom: none; }
+
+    .hist-data {
+      font-family: 'DM Mono', monospace;
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .hist-total {
+      font-weight: 500;
+    }
+
+    .hist-rep-val {
+      font-family: 'DM Mono', monospace;
+      font-size: 13px;
+      color: var(--vermelho-dark);
+    }
+
+    .hist-luc-val {
+      font-family: 'DM Mono', monospace;
+      font-size: 13px;
+      color: var(--verde-dark);
+      font-weight: 500;
+    }
+
+    .hist-del {
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--faint);
+      font-size: 16px;
+      padding: 0 2px;
+      line-height: 1;
+    }
+
+    .hist-del:hover { color: var(--vermelho); }
+
+    /* Acumulado */
+    .acum-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+    }
+
+    .acum-box {
+      background: var(--bg);
+      border-radius: var(--radius-sm);
+      padding: 12px;
+      text-align: center;
+    }
+
+    .acum-label {
+      font-size: 11px;
+      color: var(--muted);
+      margin-bottom: 4px;
+    }
+
+    .acum-val {
+      font-family: 'DM Mono', monospace;
+      font-size: 15px;
+      font-weight: 500;
+      color: var(--text);
+    }
+
+    .acum-val.g { color: var(--verde-dark); }
+
+    .btn-pdf {
+      width: 100%;
+      margin-top: 14px;
+      padding: 12px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      font-family: 'Inter', sans-serif;
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--muted);
+      cursor: pointer;
+      transition: background 0.15s, color 0.15s;
+    }
+    .btn-pdf:hover { background: var(--border); color: var(--text); }
+
+    /* Modal de margem */
+    .overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.4);
+      z-index: 100;
+      align-items: flex-end;
+      justify-content: center;
+    }
+
+    .overlay.open { display: flex; }
+
+    .modal {
+      background: var(--surface);
+      border-radius: var(--radius) var(--radius) 0 0;
+      padding: 24px 20px 40px;
+      width: 100%;
+      max-width: 480px;
+    }
+
+    .modal h3 {
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: 6px;
+    }
+
+    .modal p {
+      font-size: 13px;
+      color: var(--muted);
+      margin-bottom: 20px;
+    }
+
+    .margem-display {
+      font-family: 'DM Mono', monospace;
+      font-size: 40px;
+      font-weight: 500;
+      color: var(--verde);
+      text-align: center;
+      margin: 12px 0;
+    }
+
+    input[type=range] {
+      width: 100%;
+      accent-color: var(--verde);
+      height: 6px;
+      margin: 8px 0 20px;
+    }
+
+    .modal-btns {
+      display: flex;
+      gap: 10px;
+    }
+
+    .btn-cancel {
+      flex: 1;
+      padding: 12px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+    }
+
+    .btn-confirm {
+      flex: 2;
+      padding: 12px;
+      background: var(--verde);
+      color: white;
+      border: none;
+      border-radius: var(--radius-sm);
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .btn-confirm:hover { background: var(--verde-dark); }
+
+    /* Toast */
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(80px);
+      background: var(--text);
+      color: white;
+      padding: 12px 20px;
+      border-radius: 20px;
+      font-size: 14px;
+      font-weight: 500;
+      transition: transform 0.3s;
+      z-index: 200;
+      white-space: nowrap;
+    }
+
+    .toast.show { transform: translateX(-50%) translateY(0); }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="logo">minha loja <span>●</span></div>
+  <button class="margem-badge" onclick="abrirModal()" id="margemBtn">margem: 15%</button>
+</header>
+
+<div class="container">
+
+  <div class="card">
+    <div class="card-label">quanto entrou na conta hoje</div>
+    <div class="valor-wrap">
+      <span class="valor-prefix">R$</span>
+      <input type="number" id="valorInput" placeholder="0,00" min="0" step="0.01" oninput="calcular()">
+    </div>
+
+    <div id="previewWrap" style="display:none">
+      <div class="bar-track">
+        <div class="bar-r" id="barR"></div>
+        <div class="bar-l" id="barL"></div>
+      </div>
+      <div class="bar-legend">
+        <span>reposição de estoque</span>
+        <span>seu lucro</span>
+      </div>
+      <div class="result-split">
+        <div class="split-box rep">
+          <div class="split-label">guardar</div>
+          <div class="split-value" id="valRep">R$ 0</div>
+          <div class="split-pct" id="pctRep">85%</div>
+        </div>
+        <div class="split-box luc">
+          <div class="split-label">seu lucro</div>
+          <div class="split-value" id="valLuc">R$ 0</div>
+          <div class="split-pct" id="pctLuc">15%</div>
+        </div>
+      </div>
+    </div>
+
+    <button class="btn-salvar" id="btnSalvar" onclick="salvar()" disabled>salvar dia</button>
+  </div>
+
+  <div class="card">
+    <div class="card-label">histórico</div>
+    <div id="histList"><div class="hist-empty">nenhum dia salvo ainda</div></div>
+  </div>
+
+  <div class="card" id="acumCard" style="display:none">
+    <div class="card-label">acumulado total</div>
+    <div class="acum-grid">
+      <div class="acum-box">
+        <div class="acum-label">recebido</div>
+        <div class="acum-val" id="acumTotal">R$ 0</div>
+      </div>
+      <div class="acum-box">
+        <div class="acum-label">reposição</div>
+        <div class="acum-val" id="acumRep">R$ 0</div>
+      </div>
+      <div class="acum-box">
+        <div class="acum-label">lucro</div>
+        <div class="acum-val g" id="acumLuc">R$ 0</div>
+      </div>
+    </div>
+    <button class="btn-pdf" onclick="exportarPDF()">📄 exportar histórico em PDF</button>
+  </div>
+
+</div>
+
+<!-- Modal margem -->
+<div class="overlay" id="overlay" onclick="fecharModal(event)">
+  <div class="modal">
+    <h3>Ajustar margem de lucro</h3>
+    <p>Defina sua margem líquida média. Isso determina quanto de cada pagamento é seu lucro real.</p>
+    <div class="margem-display" id="margemDisplay">15%</div>
+    <input type="range" id="margemSlider" min="5" max="50" value="15" step="1" oninput="atualizarSlider()">
+    <div class="modal-btns">
+      <button class="btn-cancel" onclick="fecharModal()">cancelar</button>
+      <button class="btn-confirm" onclick="confirmarMargem()">confirmar</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  let margem = parseFloat(localStorage.getItem('margem')) || 15;
+  let historico = JSON.parse(localStorage.getItem('historico') || '[]');
+
+  function fmt(v) {
+    return 'R$ ' + v.toFixed(2).replace('.', ',');
+  }
+
+  function fmtData(iso) {
+    const d = new Date(iso + 'T12:00:00');
+    return d.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
+  }
+
+  function init() {
+    document.getElementById('margemBtn').textContent = 'margem: ' + margem + '%';
+    renderHistorico();
+  }
+
+  function calcular() {
+    const val = parseFloat(document.getElementById('valorInput').value);
+    const wrap = document.getElementById('previewWrap');
+    const btn = document.getElementById('btnSalvar');
+
+    if (!val || val <= 0) {
+      wrap.style.display = 'none';
+      btn.disabled = true;
+      return;
+    }
+
+    const rep = val * ((100 - margem) / 100);
+    const luc = val * (margem / 100);
+    const pRep = 100 - margem;
+
+    document.getElementById('valRep').textContent = fmt(rep);
+    document.getElementById('valLuc').textContent = fmt(luc);
+    document.getElementById('pctRep').textContent = pRep + '% do total';
+    document.getElementById('pctLuc').textContent = margem + '% do total';
+    document.getElementById('barR').style.width = pRep + '%';
+    document.getElementById('barL').style.width = margem + '%';
+
+    wrap.style.display = 'block';
+    btn.disabled = false;
+  }
+
+  function salvar() {
+    const val = parseFloat(document.getElementById('valorInput').value);
+    if (!val || val <= 0) return;
+
+    const hoje = new Date().toISOString().split('T')[0];
+    const rep = val * ((100 - margem) / 100);
+    const luc = val * (margem / 100);
+
+    historico.unshift({ data: hoje, total: val, reposicao: rep, lucro: luc, margem });
+    localStorage.setItem('historico', JSON.stringify(historico));
+
+    document.getElementById('valorInput').value = '';
+    document.getElementById('previewWrap').style.display = 'none';
+    document.getElementById('btnSalvar').disabled = true;
+
+    renderHistorico();
+    mostrarToast('Dia salvo! Lucro: ' + fmt(luc));
+  }
+
+  function deletar(i) {
+    if (!confirm('Remover este registro?')) return;
+    historico.splice(i, 1);
+    localStorage.setItem('historico', JSON.stringify(historico));
+    renderHistorico();
+  }
+
+  function renderHistorico() {
+    const el = document.getElementById('histList');
+
+    if (historico.length === 0) {
+      el.innerHTML = '<div class="hist-empty">nenhum dia salvo ainda</div>';
+      document.getElementById('acumCard').style.display = 'none';
+      return;
+    }
+
+    el.innerHTML = historico.map((h, i) => `
+      <div class="hist-row">
+        <span class="hist-data">${fmtData(h.data)}</span>
+        <span class="hist-total">${fmt(h.total)}</span>
+        <span class="hist-rep-val">-${fmt(h.reposicao)}</span>
+        <span class="hist-luc-val">+${fmt(h.lucro)}</span>
+        <button class="hist-del" onclick="deletar(${i})" title="remover">×</button>
+      </div>
+    `).join('');
+
+    const tot = historico.reduce((a, h) => a + h.total, 0);
+    const rep = historico.reduce((a, h) => a + h.reposicao, 0);
+    const luc = historico.reduce((a, h) => a + h.lucro, 0);
+
+    document.getElementById('acumTotal').textContent = fmt(tot);
+    document.getElementById('acumRep').textContent = fmt(rep);
+    document.getElementById('acumLuc').textContent = fmt(luc);
+    document.getElementById('acumCard').style.display = 'block';
+  }
+
+  function abrirModal() {
+    document.getElementById('margemSlider').value = margem;
+    document.getElementById('margemDisplay').textContent = margem + '%';
+    document.getElementById('overlay').classList.add('open');
+  }
+
+  function fecharModal(e) {
+    if (!e || e.target === document.getElementById('overlay')) {
+      document.getElementById('overlay').classList.remove('open');
+    }
+  }
+
+  function atualizarSlider() {
+    const v = document.getElementById('margemSlider').value;
+    document.getElementById('margemDisplay').textContent = v + '%';
+  }
+
+  function confirmarMargem() {
+    margem = parseInt(document.getElementById('margemSlider').value);
+    localStorage.setItem('margem', margem);
+    document.getElementById('margemBtn').textContent = 'margem: ' + margem + '%';
+    document.getElementById('overlay').classList.remove('open');
+    calcular();
+  }
+
+  function mostrarToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 3000);
+  }
+
+  function exportarPDF() {
+    if (historico.length === 0) return;
+
+    const tot = historico.reduce((a, h) => a + h.total, 0);
+    const rep = historico.reduce((a, h) => a + h.reposicao, 0);
+    const luc = historico.reduce((a, h) => a + h.lucro, 0);
+
+    const linhas = historico.map(h => `
+      <tr>
+        <td>${fmtData(h.data)}</td>
+        <td>${fmt(h.total)}</td>
+        <td style="color:#a32d2d">${fmt(h.reposicao)}</td>
+        <td style="color:#0f6e56;font-weight:500">${fmt(h.lucro)}</td>
+        <td>${h.margem}%</td>
+      </tr>
+    `).join('');
+
+    const html = `
+      <!DOCTYPE html>
+      <html lang="pt-BR">
+      <head>
+        <meta charset="UTF-8">
+        <title>Relatório de Lucro — Minha Loja</title>
+        <style>
+          body { font-family: Arial, sans-serif; padding: 32px; color: #1a1a18; }
+          h1 { font-size: 20px; margin-bottom: 4px; }
+          p.sub { font-size: 13px; color: #6b6b67; margin-bottom: 24px; }
+          table { width: 100%; border-collapse: collapse; font-size: 14px; }
+          th { background: #1a9e75; color: white; padding: 10px 12px; text-align: left; }
+          td { padding: 9px 12px; border-bottom: 1px solid #e8e6e1; }
+          tr:last-child td { border-bottom: none; }
+          .totais { display: flex; gap: 24px; margin-top: 24px; }
+          .box { background: #f7f6f3; border-radius: 8px; padding: 14px 18px; flex: 1; }
+          .box .label { font-size: 11px; color: #6b6b67; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 4px; }
+          .box .val { font-size: 18px; font-weight: 600; }
+          .g { color: #0f6e56; }
+          @media print { body { padding: 16px; } }
+        </style>
+      </head>
+      <body>
+        <h1>Relatório de Lucro — Minha Loja</h1>
+        <p class="sub">Gerado em ${new Date().toLocaleDateString('pt-BR')} • margem configurada: ${margem}%</p>
+        <table>
+          <thead>
+            <tr>
+              <th>Data</th>
+              <th>Total recebido</th>
+              <th>Reposição</th>
+              <th>Lucro</th>
+              <th>Margem</th>
+            </tr>
+          </thead>
+          <tbody>${linhas}</tbody>
+        </table>
+        <div class="totais">
+          <div class="box"><div class="label">total recebido</div><div class="val">${fmt(tot)}</div></div>
+          <div class="box"><div class="label">total reposição</div><div class="val">${fmt(rep)}</div></div>
+          <div class="box"><div class="label">lucro total</div><div class="val g">${fmt(luc)}</div></div>
+        </div>
+        <script>window.onload = function(){ window.print(); }<\/script>
+      </body>
+      </html>
+    `;
+
+    const blob = new Blob([html], { type: 'text/html' });
+    const url = URL.createObjectURL(blob);
+    const win = window.open(url, '_blank');
+    if (!win) mostrarToast('Permita pop-ups para exportar o PDF');
+  }
+
+  init();
+</script>
+</body>
+</html>
